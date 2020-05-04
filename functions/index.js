@@ -79,7 +79,8 @@ app.post("/signup", (req, res) => {
     errors.email = "must be a valid email address";
   }
   if (isEmpty(newUser.password)) errors.password = " must not be empty";
-  if (newUser.password !== newUser.confirmPassword) errors.confirmPassword = "password not the same";
+  if (newUser.password !== newUser.confirmPassword)
+    errors.confirmPassword = "password not the same";
   if (isEmpty(newUser.handle)) errors.handle = " must not be empty";
 
   if (Object.keys(errors).length > 0) return res.status(400).json(errors);
@@ -116,6 +117,35 @@ app.post("/signup", (req, res) => {
     .catch((err) => {
       console.error(err);
       return res.status(500).json({ error: err.code });
+    });
+});
+
+app.post("/login", (req, res) => {
+  const user = {
+    email: req.body.email,
+    password: req.body.password,
+  };
+
+  let errors = {};
+  if (isEmpty(user.email)) errors.email = "must not be empty";
+  if (isEmpty(user.password)) errors.password = "must not be empty";
+
+  if (Object.keys(errors).length > 0) return res.status(400).json(errors);
+
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then((data) => {
+      return data.user.getIdToken();
+    })
+    .then((token) => {
+      return res.json({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.code === "auth/wrong-password") {
+        return res.status(403).json({ general: "wrong password try again" });
+      } else return res.status(500).json({ error: err.code });
     });
 });
 
