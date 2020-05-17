@@ -86,9 +86,6 @@ exports.commentOnScream = (req, res) => {
       return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
     })
     .then(() => {
-      return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
-    })
-    .then(() => {
       return db.collection("comments").add(newComment);
     })
     .then(() => {
